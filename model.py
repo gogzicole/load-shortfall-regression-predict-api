@@ -48,7 +48,23 @@ def _preprocess_data(data):
     feature_vector_dict = json.loads(data)
     # Load the dictionary as a Pandas DataFrame.
     feature_vector_df = pd.DataFrame.from_dict([feature_vector_dict])
+    # All numerical columns in the train set was of datatype 'float64', lets do 
+    numerical_columns = [col for col in feature_vector_df.columns if feature_vector_df[col].dtype != 'O']
+    # Convert all numerical columns to dtype float64
+    feature_vector_df[numerical_columns] = feature_vector_df[numerical_columns].astype('float64')
 
+    # Convert the time column to datetime format
+    feature_vector_df['time'] = pd.to_datetime(feature_vector_df['time'], format = '%Y-%m-%d %H:%M:%S')
+
+    feature_vector_df['Month'] = feature_vector_df['time'].dt.month   # Extract month from the time column
+    feature_vector_df['Day'] = feature_vector_df['time'].dt.day       # Extract day from the time column
+    feature_vector_df['Hour'] = feature_vector_df['time'].dt.hour     # Extract hour from the time column
+    # Drop the time column from test data
+    feature_vector_df.drop('time', axis= 1, inplace= True)
+
+    time_cols = ['Month', 'Day', 'Hour'] #Select newly created time columns
+    # Convert time columns to categorical variables
+    feature_vector_df[time_cols] = feature_vector_df[time_cols].astype('category')
     # ---------------------------------------------------------------
     # NOTE: You will need to swap the lines below for your own data
     # preprocessing methods.
@@ -58,7 +74,16 @@ def _preprocess_data(data):
     # ---------------------------------------------------------------
 
     # ----------- Replace this code with your own preprocessing steps --------
-    predict_vector = feature_vector_df[['Madrid_wind_speed','Bilbao_rain_1h','Valencia_wind_speed']]
+    predict_vector = feature_vector_df[['Madrid_wind_speed','Valencia_wind_speed','Bilbao_clouds_all',
+                                        'Bilbao_wind_speed','Seville_clouds_all','Bilbao_wind_deg',
+                                        'Barcelona_wind_speed','Barcelona_wind_deg','Madrid_clouds_all',
+                                        'Seville_wind_speed','Bilbao_snow_3h','Barcelona_pressure',
+                                        'Seville_rain_3h','Barcelona_rain_3h','Valencia_snow_3h',
+                                        'Madrid_weather_id','Barcelona_weather_id','Bilbao_pressure',
+                                        'Seville_weather_id','Madrid_pressure','Valencia_temp',
+                                        'Bilbao_weather_id','Seville_temp','Valencia_humidity',
+                                        'Barcelona_temp','Bilbao_temp','Madrid_temp',
+                                        'Hour','Day','Month']]
     # ------------------------------------------------------------------------
 
     return predict_vector
